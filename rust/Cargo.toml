@@ -1,0 +1,46 @@
+[package]
+name = "bond"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+description = "A complete, high-performance Rust parser and writer for the Microsoft Bond serialization format (Compact Binary v1/v2, Fast Binary, Simple Binary v1/v2, Simple JSON), with SIMD-accelerated primitives, data generation and benchmarking."
+license = "MIT"
+repository = "https://github.com/microsoft/bond"
+keywords = ["bond", "serialization", "parser", "simd", "binary"]
+categories = ["encoding", "parser-implementations"]
+
+[dependencies]
+# SIMD-accelerated UTF-8 validation (AVX2/SSE4.2 on x86, NEON on aarch64, with scalar fallback).
+simdutf8 = "0.1"
+# Used only by the Simple JSON protocol for spec-correct JSON tokenization/number
+# parsing. `float_roundtrip` guarantees bit-exact f64 parsing (off-by-1-ULP
+# otherwise), so Simple JSON preserves floating-point values exactly.
+serde_json = { version = "1", features = ["float_roundtrip"] }
+# Deterministic data generation for the generator and fuzz/roundtrip tests.
+rand = "0.8"
+rand_chacha = "0.3"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[features]
+default = ["std"]
+std = []
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+
+[profile.bench]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+
+[[bench]]
+name = "bond_bench"
+harness = false
+
+[lib]
+bench = false
